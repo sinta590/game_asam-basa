@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<title>Permainan Asam Basa Edukatif</title>
+<style>
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #e0f7fa;
+    color: #004d40;
+    margin: 0; padding: 20px;
+    text-align: center;
+  }
+  #start-screen, #game, #stage-complete, #final-score, #rules {
+    max-width: 600px;
+    margin: auto;
+    background: #ffffff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 6px #004d40aa;
+  }
+  h1,h2 {
+    margin-bottom: 15px;
+  }
+  button {
+    cursor: pointer;
+    background: #00796b;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 20px;
+    margin: 10px 5px 0 5px;
+    font-size: 16px;
+  }
+  button:hover {
+    background: #004d40;
+  }
+  #question {
+    font-size: 22px;
+    margin: 20px 0;
+    min-height: 70px;
+  }
+  .choices button {
+    display: inline-block;
+    margin: 5px 10px;
+    min-width: 100px;
+  }
+  #feedback {
+    margin-top: 10px;
+    font-weight: bold;
+    min-height: 25px;
+  }
+  #timer {
+    font-weight: bold;
+    font-size: 18px;
+    margin-top: 10px;
+  }
+  input[type=text] {
+    font-size: 16px;
+    padding: 8px;
+    margin: 5px;
+    width: 80%;
+    max-width: 300px;
+  }
+  #rules {
+    margin-bottom: 20px;
+    text-align: left;
+  }
+</style>
+</head>
+<body>
+
+<div id="start-screen">
+  <h1>Permainan Asam Basa Edukatif</h1>
+  <div id="rules">
+    <h2>Aturan Permainan:</h2>
+    <ul>
+      <li>Permainan terdiri dari 5 stage, tiap stage 10 soal.</li>
+      <li>Jawaban soal harus dipilih sebelum waktu 15 detik habis.</li>
+      <li>Setelah menjawab soal akan muncul feedback benar/salah.</li>
+      <li>Setiap stage selesai akan muncul nilai sementara dan harus klik tombol lanjut.</li>
+      <li>Skor akhir dihitung dari total jawaban benar dikali 2.</li>
+      <li>Jawaban tidak acak untuk memudahkan pengajaran.</li>
+    </ul>
+  </div>
+  <div>
+    <input type="text" id="input-name" placeholder="Masukkan Nama Kamu" />
+    <br />
+    <input type="text" id="input-class" placeholder="Masukkan Kelas Kamu" />
+  </div>
+  <button id="start-btn" disabled>Mulai Permainan</button>
+</div>
+
+<div id="game" style="display:none;">
+  <h2>Stage <span id="stage-number">1</span></h2>
+  <div id="question"></div>
+  <div class="choices" id="choices"></div>
+  <div id="feedback"></div>
+  <div id="timer">Waktu: <span id="time-left">15</span> detik</div>
+  <button id="next-question-btn" style="display:none;">Soal Berikutnya</button>
+</div>
+
+<div id="stage-complete" style="display:none;">
+  <h2>Stage <span id="completed-stage"></span> selesai!</h2>
+  <p>Skor Stage ini: <span id="stage-score"></span> / 10</p>
+  <button id="next-stage-btn">Lanjut ke Stage Berikutnya</button>
+</div>
+
+<div id="final-score" style="display:none;">
+  <h2>Permainan Selesai!</h2>
+  <p>Nama: <span id="player-name"></span></p>
+  <p>Kelas: <span id="player-class"></span></p>
+  <p>Skor Total: <span id="total-score"></span> / 100</p>
+  <h3 id="appreciation"></h3>
+  <button id="restart-btn">Main Lagi</button>
+</div>
+
+<script>
+  const stages = [
+    // Stage 1: Identifikasi larutan Asam, Basa, Netral
+    {
+      questions: [
+        {q:"Lemon juice termasuk larutan?", choices:["Asam","Basa","Netral"], answer:"Asam"},
+        {q:"Sabun termasuk larutan?", choices:["Asam","Basa","Netral"], answer:"Basa"},
+        {q:"Air murni termasuk larutan?", choices:["Asam","Basa","Netral"], answer:"Netral"},
+        {q:"Cuka termasuk larutan?", choices:["Asam","Basa","Netral"], answer:"Asam"},
+        {q:"Soda kue termasuk larutan?", choices:["Asam","Basa","Netral"], answer:"Basa"},
+        {q:"Susu termasuk larutan?", choices:["Asam","Basa","Netral"], answer:"Netral"},
+        {q:"Kopi termasuk larutan?", choices:["Asam","Basa","Netral"], answer:"Asam"},
+        {q:"Pemutih termasuk larutan?", choices:["Asam","Basa","Netral"], answer:"Basa"},
+        {q:"Jus tomat termasuk larutan?", choices:["Asam","Basa","Netral"], answer:"Asam"},
+        {q:"Air biasa termasuk larutan?", choices:["Asam","Basa","Netral"], answer:"Netral"},
+      ]
+    },
+    // Stage 2: Identifikasi larutan Asam, Basa, Netral
+    {
+      questions: [
+        {q:"Pasta gigi termasuk larutan?", choices:["Asam","Basa","Netral"], answer:"Basa"},
+        {q:"Minuman cola termasuk larutan?", choices:["Asam","Basa","Netral"], answer:"Asam"},
+        {q:"Shampo termasuk larutan?", choices:["Asam","Basa","Netral"], answer:"Asam"},
+        {q:"Pembersih ammonia termasuk larutan?", choices:["Asam","Basa","Netral"], answer:"Basa"},
+        {q:"Air hujan termasuk larutan?", choices:["Asam","Basa","Netral"], answer:"Asam"},
+        {q:"Tablet antasid termasuk larutan?", choices:["Asam","Basa","Netral"], answer:"Basa"},
+        {q:"Asam lambung termasuk larutan?", choices:["Asam","Basa","Netral"], answer:"Asam"},
+        {q:"Putih telur termasuk larutan?", choices:["Asam","Basa","Netral"], answer:"Basa"},
+        {q:"Sabun tangan termasuk larutan?", choices:["Asam","Basa","Netral"], answer:"Basa"},
+        {q:"Kopi hitam termasuk larutan?", choices:["Asam","Basa","Netral"], answer:"Asam"},
+      ]
+    },
+    // Stage 3: Warna kertas lakmus
+    {
+      questions: [
+        {q:"Kertas lakmus merah berubah warna menjadi?", choices:["Biru","Merah","Hijau"], answer:"Biru"},
+        {q:"Kertas lakmus biru berubah warna menjadi?", choices:["Merah","Biru","Kuning"], answer:"Merah"},
+        {q:"Kertas lakmus merah tidak berubah warna pada larutan?", choices:["Netral","Asam","Basa"], answer:"Asam"},
+        {q:"Kertas lakmus biru tidak berubah warna pada larutan?", choices:["Netral","Asam","Basa"], answer:"Basa"},
+        {q:"Kertas lakmus biru berubah warna menjadi merah pada larutan?", choices:["Asam","Basa","Netral"], answer:"Asam"},
+        {q:"Kertas lakmus merah berubah warna menjadi biru pada larutan?", choices:["Asam","Basa","Netral"], answer:"Basa"},
+        {q:"Larutan netral pada kertas lakmus ditandai dengan warna?", choices:["Merah dan Biru tetap","Merah","Biru"], answer:"Merah dan Biru tetap"},
+        {q:"Kertas lakmus biru berubah warna pada larutan basa?", choices:["Tidak","Ya","Kadang"], answer:"Tidak"},
+        {q:"Kertas lakmus merah berubah warna pada larutan basa?", choices:["Ya","Tidak","Kadang"], answer:"Ya"},
+        {q:"Kertas lakmus merah berubah warna pada larutan asam?", choices:["Tidak","Ya","Kadang"], answer:"Tidak"},
+      ]
+    },
+    // Stage 4: Nilai pH (benar/salah format, misal "pH 7 = netral")
+    {
+      questions: [
+        {q:"pH 1 menunjukkan larutan sangat asam.", choices:["Benar","Salah"], answer:"Benar"},
+        {q:"pH 7 menunjukkan larutan netral.", choices:["Benar","Salah"], answer:"Benar"},
+        {q:"pH 14 menunjukkan larutan sangat basa.", choices:["Benar","Salah"], answer:"Benar"},
+        {q:"pH 5 termasuk larutan basa.", choices:["Benar","Salah"], answer:"Salah"},
+        {q:"pH 10 termasuk larutan basa.", choices:["Benar","Salah"], answer:"Benar"},
+        {q:"pH 3 termasuk larutan asam.", choices:["Benar","Salah"], answer:"Benar"},
+        {q:"pH 8 termasuk larutan asam.", choices:["Benar","Salah"], answer:"Salah"},
+        {q:"pH 7 termasuk larutan asam.", choices:["Benar","Salah"], answer:"Salah"},
+        {q:"pH 6 termasuk larutan asam.", choices:["Benar","Salah"], answer:"Benar"},
+        {q:"pH 9 termasuk larutan basa.", choices:["Benar","Salah"], answer:"Benar"},
+      ]
+    },
+    // Stage 5: Reaksi Asam-Basa dan Konsep Netralisasi
+    {
+      questions: [
+        {q:"Reaksi antara asam dan basa disebut?", choices:["Netralisasi","Oksidasi","Reduksi"], answer:"Netralisasi"},
+        {q:"HCl + NaOH menghasilkan?", choices:["NaCl + H2O","H2 + NaCl","NaOH + H2"], answer:"NaCl + H2O"},
+        {q:"Netralisasi menghasilkan?", choices:["Air dan garam","Gas","Asam kuat"], answer:"Air dan garam"},
+        {q:"Reaksi asam dan basa bersifat?", choices:["Eksotermik","Endotermik","Tidak ada"], answer:"Eksotermik"},
+        {q:"pH campuran asam dan basa netral adalah?", choices:["7","1","14"], answer:"7"},
+        {q:"NaOH adalah contoh dari?", choices:["Basa","Asam","Netral"], answer:"Basa"},
+        {q:"H2SO4 adalah contoh dari?", choices:["Asam","Basa","Netral"], answer:"Asam"},
+        {q:"Larutan garam netral hasil netralisasi?", choices:["Ya","Tidak","Kadang"], answer:"Ya"},
+        {q:"Larutan asam memiliki ion?", choices:["H+","OH-","Na+"], answer:"H+"},
+        {q:"Larutan basa memiliki ion?", choices:["OH-","H+","Cl-"], answer:"OH-"},
+      ]
+    },
+  ];
+
+  let currentStage = 0;
+  let currentQuestion = 0;
+  let stageScore = 0;
+  let totalScore = 0;
+  let timer;
+  let timeLeft = 15;
+
+  // Elements
+  const startScreen = document.getElementById('start-screen');
+  const startBtn = document.getElementById('start-btn');
+  const nameInput = document.getElementById('input-name');
+  const classInput = document.getElementById('input-class');
+
+  const gameDiv = document.getElementById('game');
+  const stageNumberEl = document.getElementById('stage-number');
+  const questionEl = document.getElementById('question');
+  const choicesEl = document.getElementById('choices');
+  const feedbackEl = document.getElementById('feedback');
+  const nextQuestionBtn = document.getElementById('next-question-btn');
+  const timerEl = document.getElementById('time-left');
+
+  const stageCompleteDiv = document.getElementById('stage-complete');
+  const completedStageEl = document.getElementById('completed-stage');
+  const stageScoreEl = document.getElementById('stage-score');
+  const nextStageBtn = document.getElementById('next-stage-btn');
+
+  const finalScoreDiv = document.getElementById('final-score');
+  const playerNameEl = document.getElementById('player-name');
+  const playerClassEl = document.getElementById('player-class');
+  const totalScoreEl = document.getElementById('total-score');
+  const appreciationEl = document.getElementById('appreciation');
+  const restartBtn = document.getElementById('restart-btn');
+
+  // Enable start button only if name and class filled
+  function checkInput() {
+    startBtn.disabled = !(nameInput.value.trim() && classInput.value.trim());
+  }
+  nameInput.addEventListener('input', checkInput);
+  classInput.addEventListener('input', checkInput);
+
+  startBtn.onclick = () => {
+    startScreen.style.display = 'none';
+    currentStage = 0;
+    totalScore = 0;
+    startStage();
+  };
+
+  function startStage() {
+    stageScore = 0;
+    currentQuestion = 0;
+    stageNumberEl.textContent = currentStage + 1;
+    stageCompleteDiv.style.display = 'none';
+    finalScoreDiv.style.display = 'none';
+    gameDiv.style.display = 'block';
+    nextQuestionBtn.style.display = 'none';
+    feedbackEl.textContent = '';
+    showQuestion();
+  }
+
+  function showQuestion() {
+    feedbackEl.textContent = '';
+    nextQuestionBtn.style.display = 'none';
+    const currentQ = stages[currentStage].questions[currentQuestion];
+    questionEl.textContent = currentQ.q;
+    choicesEl.innerHTML = '';
+    timeLeft = 15;
+    timerEl.textContent = timeLeft;
+    // buat pilihan
+    currentQ.choices.forEach(choice => {
+      const btn = document.createElement('button');
+      btn.textContent = choice;
+      btn.onclick = () => selectAnswer(choice);
+      choicesEl.appendChild(btn);
+    });
+    startTimer();
+  }
+
+  function startTimer() {
+    timer = setInterval(() => {
+      timeLeft--;
+      timerEl.textContent = timeLeft;
+      if (timeLeft <= 0) {
+        clearInterval(timer);
+        feedbackEl.textContent = `Waktu habis! Jawaban benar: ${stages[currentStage].questions[currentQuestion].answer}`;
+        disableChoices();
+        nextQuestionBtn.style.display = 'inline-block';
+      }
+    }, 1000);
+  }
+
+  function selectAnswer(choice) {
+    clearInterval(timer);
+    disableChoices();
+    const correctAnswer = stages[currentStage].questions[currentQuestion].answer;
+    if (choice === correctAnswer) {
+      feedbackEl.textContent = "Benar!";
+      stageScore++;
+    } else {
+      feedbackEl.textContent = `Salah! Jawaban benar: ${correctAnswer}`;
+    }
+    nextQuestionBtn.style.display = 'inline-block';
+  }
+
+  function disableChoices() {
+    const btns = choicesEl.querySelectorAll('button');
+    btns.forEach(btn => btn.disabled = true);
+  }
+
+  nextQuestionBtn.onclick = () => {
+    currentQuestion++;
+    if (currentQuestion < stages[currentStage].questions.length) {
+      showQuestion();
+    } else {
+      // selesai stage
+      totalScore += stageScore;
+      gameDiv.style.display = 'none';
+      stageCompleteDiv.style.display = 'block';
+      completedStageEl.textContent = currentStage + 1;
+      stageScoreEl.textContent = `${stageScore} / 10`;
+    }
+  };
+
+  nextStageBtn.onclick = () => {
+    currentStage++;
+    if (currentStage < stages.length) {
+      startStage();
+    } else {
+      // permainan selesai
+      stageCompleteDiv.style.display = 'none';
+      showFinalScore();
+    }
+  };
+
+  function showFinalScore() {
+    finalScoreDiv.style.display = 'block';
+    playerNameEl.textContent = nameInput.value.trim();
+    playerClassEl.textContent = classInput.value.trim();
+    const finalScore = totalScore * 2;
+    totalScoreEl.textContent = finalScore;
+    // Apresiasi berdasarkan skor
+    if (finalScore >= 90) {
+      appreciationEl.textContent = "Hebat! Kamu sangat menguasai materi asam basa!";
+    } else if (finalScore >= 70) {
+      appreciationEl.textContent = "Bagus! Kamu cukup paham materi asam basa.";
+    } else if (finalScore >= 50) {
+      appreciationEl.textContent = "Lumayan, tapi perlu latihan lagi.";
+    } else {
+      appreciationEl.textContent = "Jangan menyerah, coba lagi untuk hasil lebih baik!";
+    }
+  }
+
+  restartBtn.onclick = () => {
+    finalScoreDiv.style.display = 'none';
+    startScreen.style.display = 'block';
+    nameInput.value = '';
+    classInput.value = '';
+    checkInput();
+  };
+
+  // Inisialisasi tombol start disabled
+  checkInput();
+</script>
+
+</body>
+</html>
